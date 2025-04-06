@@ -6,77 +6,114 @@
   <title>Произошла неизвестная ошибка — SNDTAG</title>
   <script src="https://cdn.tailwindcss.com"></script>
 
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+  <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests" />
+  <meta http-equiv="X-Content-Type-Options" content="nosniff" />
+  <meta http-equiv="X-Frame-Options" content="DENY" />
+  <meta name="referrer" content="no-referrer-when-downgrade" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet" />
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.form/4.3.0/jquery.form.min.js"></script>
+  <script src="/assets/js/XAlert.js?cache=1743955448"></script>
+  <link rel="stylesheet" href="/assets/css/app.css?cache=1743955448" />
 
   <style>
-    body {
+    .glow {
+      text-shadow: 0 0 10px #8ab4f8, 0 0 20px #8ab4f8, 0 0 40px #8ab4f8;
+    }
+    .glow-box {
+      box-shadow: 0 0 15px #8ab4f860, 0 0 30px #8ab4f840;
+    }
+    .fancy-text {
       font-family: 'Orbitron', sans-serif;
     }
-    .glow {
-      text-shadow: 0 0 5px #8ab4f8, 0 0 10px #8ab4f8, 0 0 20px #5f91e0;
-    }
-    .card {
-      background: rgba(255, 255, 255, 0.05);
-      backdrop-filter: blur(10px);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      box-shadow: 0 0 20px rgba(138, 180, 248, 0.1);
+    .smooth {
+      transition: all 0.3s ease-in-out;
     }
   </style>
 </head>
 <body class="min-h-screen bg-[#202124] text-[#e8eaed] select-none cursor-pointer overflow-hidden">
-  <div id="errorMessage" class="flex flex-col items-center justify-center min-h-screen p-6 text-center">
-    <img src="https://avatars.akamai.steamstatic.com/f91320287fe741836e83afc46c03e22f03b1df25_medium.jpg" class="w-16 mb-6 rounded-full shadow-lg" />
-    <h1 class="text-2xl font-bold text-[#999ca2]">Не удается получить доступ к сайту</h1>
-    <p class="mt-4 text-[#999ca2] text-sm">Не удалось найти IP-адрес сервера <strong>sndtag.ru</strong>.</p>
-    <div class="mt-6 space-y-2 text-[#999ca2] text-sm">
-      <p>Попробуйте сделать следующее:</p>
-      <p>• Проверьте подключение к интернету.</p>
-    </div>
-    <p class="mt-6 text-[#999ca2] text-sm">SOUNDTAG_ERROR_PRANK_RESOLVED</p>
-    <div class="mt-10 space-y-4">
-      <button id="retryButton" class="bg-[#89b4f8] text-[#0d0d0d] font-bold px-6 py-3 rounded-full hover:scale-105 transition">Перезагрузить</button>
-      <button onclick="telega()" class="text-[#89b4f8] border border-[#89b4f8] px-6 py-3 rounded-full hover:bg-[#1f2937] transition">Сведения</button>
+
+  <!-- TOAST (same as before) -->
+  <div id="toast" class="z-[9999] fixed left-0 right-0 top-6 justify-center hidden">
+    <div class="bg-[#1E1E1E] rounded-lg px-5 py-3 ring-2 ring-inset ring-[#2d2d2d] shadow-xl">
+      <div class="flex gap-2.5 items-center">
+        <p id="toast__text" class="text-medium text-white">Недействительный запрос</p>
+      </div>
     </div>
   </div>
 
-  <div id="soundPlaying" class="hidden flex-col items-center justify-center min-h-screen text-center px-4">
-    <img src="/assets/img/s.png" class="w-32 mb-6 glow" draggable="false" oncontextmenu="return false;" />
-    <button id="muteButton" class="bg-[#1f1f1f] px-6 py-3 rounded-xl mt-4 glow border border-[#333] hover:bg-[#333]">🔇 Заглушить</button>
-    <a href="#" id="watermark" target="_blank" class="mt-10 text-5xl font-bold glow text-[#8ab4f8] hover:text-[#a7c2fb] transition">@sndtag</a>
+  <!-- ORIGINAL FIRST PAGE -->
+  <div class="overflow-hidden">
+    <div class="flex flex-col min-h-screen justify-center p-8" id="errorMessage">
+      <img src="https://avatars.akamai.steamstatic.com/f91320287fe741836e83afc46c03e22f03b1df25_medium.jpg" alt="" class="w-[48px]">
+      <h1 class="text-xl mt-12 font-medium text-[#999ca2] w-[18rem]">Не удается получить доступ к сайту</h1>
+      <span class="text-s text-[#999ca2] mt-6">Не удалось найти IP-адрес сервера <b>sndtag.ru</b>.</span>
+      <span class="text-s text-[#999ca2] mt-4">Попробуйте сделать следующее:</span>
+      <span class="text-s text-[#999ca2]">Проверьте подключение к интернету.</span>
+      <span class="text-s text-[#999ca2] mt-6">SOUNDTAG_ERROR_PRANK_RESOLVED</span>
+      <div class="buttons gap-3 flex flex-col justify-end relative mt-[15vh]">
+        <button class="bg-[#89b4f8] p-[15px_36px] rounded-3xl active:scale-90 active:opacity-80 smooth text-[#30333a] font-medium" id="retryButton">Перезагрузить</button>
+        <button class="p-[18px_36px] rounded-3xl active:scale-90 active:opacity-80 smooth text-[#89b4f8] font-medium" onclick="telega()">Сведения</button>
+      </div>
+    </div>
+
+    <!-- MODERN STYLED SECOND PAGE -->
+    <div class="text-center flex-col items-center justify-center hidden min-h-screen bg-[#202124]" id="soundPlaying">
+      <img src="/assets/img/s.png"
+           alt="Логотип бренда"
+           class="w-[130px] md:w-[160px] mx-auto mt-20 animate-pulse glow-box"
+           loading="lazy"
+           draggable="false"
+           oncontextmenu="return false;" />
+
+      <h1 class="text-4xl md:text-5xl font-bold text-[#8ab4f8] mt-10 glow fancy-text">Welcome to SNDTAG</h1>
+
+      <button class="bg-[#303134] text-white text-xl font-semibold px-10 py-4 mt-12 rounded-2xl shadow-xl glow-box hover:scale-105 active:scale-95 smooth"
+              id="muteButton">🔇 Заглушить</button>
+
+      <a href="" target="_blank"
+         class="mt-12 text-[48px] md:text-[64px] font-bold text-[#202124] bg-[#8ab4f8] px-10 py-4 rounded-xl glow-box fancy-text hover:scale-105 active:scale-95 smooth"
+         id="watermark">@sndtag</a>
+
+      <audio id="funSound" src="/assets/songs/ston.mp3" loop></audio>
+    </div>
   </div>
 
-  <audio id="funSound" src="/assets/songs/ston.mp3" loop></audio>
-
+  <!-- SCRIPT -->
   <script>
     document.addEventListener('DOMContentLoaded', function () {
-      const errorMessage = document.getElementById('errorMessage');
       const retryButton = document.getElementById('retryButton');
-      const soundPlaying = document.getElementById('soundPlaying');
-      const sound = document.getElementById('funSound');
       const muteButton = document.getElementById('muteButton');
+      const sound = document.getElementById('funSound');
       let muteClicks = 0;
 
       function playSound() {
         sound.volume = 1.0;
-        sound.play().then(() => {
-          const elem = document.documentElement;
-          if (elem.requestFullscreen) {
-            elem.requestFullscreen().catch(() => {});
-          }
-          errorMessage.classList.add('hidden');
-          soundPlaying.classList.remove('hidden');
-          soundPlaying.classList.add('flex');
-        }).catch((e) => {
-          alert('Ошибка воспроизведения. Попробуйте снова.');
-        });
+        sound.play()
+          .then(() => {
+            const elem = document.documentElement;
+            if (elem.requestFullscreen) {
+              elem.requestFullscreen().catch(() => {});
+            }
+
+            document.getElementById("errorMessage").classList.add("hidden");
+            const soundPage = document.getElementById("soundPlaying");
+            soundPage.classList.remove("hidden");
+            soundPage.classList.add("flex");
+          })
+          .catch((e) => {
+            console.error('Ошибка воспроизведения звука:', e);
+            alert('Попробуйте снова.');
+          });
       }
 
       retryButton.addEventListener('click', playSound);
       document.body.addEventListener('click', playSound, { once: true });
 
-      muteButton.addEventListener('click', () => {
+      muteButton.addEventListener('click', function () {
         muteClicks++;
         if (muteClicks >= 3) {
           window.open("", "_blank");
